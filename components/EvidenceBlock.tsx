@@ -3,13 +3,8 @@
 
 import { useState, useMemo } from "react";
 import { ChevronDown, ChevronRight, FileCode } from "lucide-react";
-import { parsePatch, getSnippetByRange, ParsedPatch } from "@/lib/diff";
+import { parsePatch, getSnippetByRange, ParsedPatch } from "@/lib/diff-utils";
 import { cn } from "@/lib/utils";
-// We import PRFile type, but since it's in lib/github which imports Octokit (server-only usually?)
-// We should check provided types for client.
-// lib/github.ts imports Octokit -> Node only?
-// Actually Octokit can run in browser too usually, but safe to redefine interface or ensure lib/github is safe.
-// Let's just define the interface here to be safe and avoid importing server code.
 interface PRFile {
     filename: string;
     patch?: string;
@@ -22,9 +17,6 @@ interface EvidenceBlockProps {
 
 export function EvidenceBlock({ citations, files }: EvidenceBlockProps) {
     const [isOpen, setIsOpen] = useState(false);
-
-    // Memoize parsing patches to avoid re-parsing on every render
-    // In a real app we might pre-parse at the page level.
     const snippets = useMemo(() => {
         return citations.map(citation => {
             // Parse citation: [path:Lstart-Lend]

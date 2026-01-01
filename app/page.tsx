@@ -21,15 +21,20 @@ export default function Home() {
     }
 
     // Basic validation
-    const regex = /github\.com\/[\w.-]+\/[\w.-]+\/pull\/\d+/;
+    // Matches github.com/owner/repo or github.com/owner/repo/pull/123
+    const regex = /github\.com\/[\w.-]+\/[\w.-]+(?:\/?$|\/pull\/\d+)/;
     if (!regex.test(url)) {
-      setError("Please enter a valid GitHub PR URL (e.g., github.com/owner/repo/pull/123).");
+      setError("Please enter a valid GitHub URL (e.g., github.com/owner/repo or .../pull/123).");
       return;
     }
 
     // Encode and push
     const encoded = encodeURIComponent(url);
-    router.push(`/review?pr=${encoded}`);
+    if (url.includes("/pull/")) {
+      router.push(`/review?pr=${encoded}`);
+    } else {
+      router.push(`/repo?url=${encoded}`);
+    }
   };
 
   return (

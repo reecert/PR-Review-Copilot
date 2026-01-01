@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from lib.github import get_pr_details
+from lib.github import get_pr_details, get_repo_prs
 from lib.llm import analyze_pr
 from fastapi.middleware.cors import CORSMiddleware
 import logging
@@ -62,6 +62,16 @@ async def analyze_pull_request(request: AnalyzeRequest):
 
     except Exception as e:
         logger.error(f"Analysis failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/list-prs")
+async def list_pull_requests(request: AnalyzeRequest):
+    logger.info(f"Listing PRs for: {request.pr_url}")
+    try:
+        prs = get_repo_prs(request.pr_url)
+        return {"prs": prs}
+    except Exception as e:
+        logger.error(f"Listing PRs failed: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/health")
