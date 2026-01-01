@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Loader2, AlertTriangle, CheckCircle, Bug, Shield, FileText, Anchor } from "lucide-react";
 import { EvidenceBlock } from "@/components/EvidenceBlock";
+import { LoadingScreen } from "@/components/LoadingScreen";
 import { cn } from "@/lib/utils";
 
 // Define response types
@@ -71,17 +72,17 @@ export default function ReviewPage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-gray-950 flex flex-col items-center justify-center text-white space-y-6">
-                <div className="relative">
-                    <div className="absolute inset-0 bg-blue-500 blur-xl opacity-20 animate-pulse rounded-full" />
-                    <Loader2 className="w-16 h-16 animate-spin text-blue-500 relative z-10" />
-                </div>
-                <div className="text-center space-y-2">
-                    <h2 className="text-2xl font-bold">Analyzing Pull Request</h2>
-                    <p className="text-gray-400">Fetching files, parsing diffs, and consulting the AI...</p>
-                    <p className="text-xs text-gray-600 animate-pulse">This may take up to 60 seconds.</p>
-                </div>
-            </div>
+            <LoadingScreen
+                title="Analyzing Pull Request"
+                subtitle="Our AI is reading through the changes..."
+                steps={[
+                    "Fetching repository files...",
+                    "Parsing diffs and patches...",
+                    "Analyzing logic for bugs...",
+                    "Checking for security vulnerabilities...",
+                    "Generating final report..."
+                ]}
+            />
         );
     }
 

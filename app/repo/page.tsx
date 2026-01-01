@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Loader2, GitPullRequest, Calendar, User, ArrowRight, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { LoadingScreen } from "@/components/LoadingScreen";
 
 interface PRSummary {
     number: number;
@@ -56,10 +57,10 @@ export default function RepoPage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-gray-950 flex flex-col items-center justify-center text-white space-y-4">
-                <Loader2 className="w-10 h-10 animate-spin text-blue-500" />
-                <p className="text-gray-400">Fetching open PRs...</p>
-            </div>
+            <LoadingScreen
+                title="Fetching Open PRs"
+                subtitle="Scanning repository for active pull requests..."
+            />
         );
     }
 
@@ -76,48 +77,93 @@ export default function RepoPage() {
         );
     }
 
-    return (
-        <div className="min-h-screen bg-gray-950 text-gray-200 p-6 font-sans">
-            <header className="max-w-4xl mx-auto mb-8">
-                <a href="/" className="text-sm text-blue-400 hover:text-blue-300 mb-4 inline-block">&larr; Back to Search</a>
-                <h1 className="text-3xl font-bold text-white mb-2">Open Pull Requests</h1>
-                <p className="text-gray-400 truncate">{repoUrl}</p>
-            </header>
 
-            <main className="max-w-4xl mx-auto space-y-4">
-                {prs.length === 0 ? (
-                    <div className="text-center py-10 bg-gray-900 rounded-xl border border-gray-800">
-                        <p className="text-gray-400">No open pull requests found for this repository.</p>
+    return (
+        <div className="min-h-screen bg-[#030014] text-white relative overflow-hidden font-sans selection:bg-purple-500/30">
+            {/* Dynamic Background */}
+            <div className="absolute inset-0 w-full h-full bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none" />
+
+            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-purple-500/10 blur-[120px] rounded-full mix-blend-screen pointer-events-none" />
+            <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-600/10 blur-[120px] rounded-full pointer-events-none" />
+
+            <div className="relative z-10 max-w-4xl mx-auto p-6">
+                <header className="mb-10 pt-10">
+                    <button
+                        onClick={() => router.push("/")}
+                        className="group flex items-center gap-2 text-sm text-gray-400 hover:text-white mb-6 transition-colors"
+                    >
+                        <div className="p-1 rounded-md bg-white/5 border border-white/10 group-hover:bg-white/10 transition-colors">
+                            <ArrowRight className="w-3 h-3 rotate-180" />
+                        </div>
+                        Back to Search
+                    </button>
+
+                    <div className="flex items-center gap-3 mb-3">
+                        <div className="p-2.5 rounded-xl bg-gradient-to-br from-purple-500/20 to-blue-500/20 border border-white/10">
+                            <GitPullRequest className="w-6 h-6 text-purple-300" />
+                        </div>
+                        <h1 className="text-3xl font-bold tracking-tight text-white">Open Pull Requests</h1>
                     </div>
-                ) : (
-                    prs.map((pr) => (
-                        <div
-                            key={pr.number}
-                            onClick={() => router.push(`/review?pr=${encodeURIComponent(pr.url)}`)}
-                            className="bg-gray-900 border border-gray-800 rounded-xl p-6 hover:border-blue-500/30 hover:bg-gray-800/50 transition-all cursor-pointer group"
-                        >
-                            <div className="flex items-start justify-between gap-4">
-                                <div className="flex-1">
-                                    <h3 className="text-lg font-semibold text-white group-hover:text-blue-300 transition-colors mb-2">
-                                        {pr.title} <span className="text-gray-500 text-base font-normal">#{pr.number}</span>
-                                    </h3>
-                                    <div className="flex items-center gap-4 text-sm text-gray-400">
-                                        <div className="flex items-center gap-1">
-                                            <User className="w-3 h-3" />
-                                            {pr.user}
+                    <p className="text-gray-400 font-mono text-sm pl-1">{repoUrl}</p>
+                </header>
+
+                <main className="space-y-4">
+                    {prs.length === 0 ? (
+                        <div className="text-center py-20 px-6 rounded-3xl bg-white/5 border border-white/10 border-dashed backdrop-blur-sm">
+                            <div className="inline-flex p-4 rounded-full bg-white/5 mb-4">
+                                <GitPullRequest className="w-8 h-8 text-gray-500" />
+                            </div>
+                            <h3 className="text-xl font-medium text-white mb-2">No Open Pull Requests</h3>
+                            <p className="text-gray-400 max-w-sm mx-auto">This repository doesn't have any open pull requests right now.</p>
+                        </div>
+                    ) : (
+                        <div className="grid gap-3">
+                            {prs.map((pr, i) => (
+                                <div
+                                    key={pr.number}
+                                    onClick={() => router.push(`/review?pr=${encodeURIComponent(pr.url)}`)}
+                                    className="group relative bg-[#0a0a0a]/50 border border-white/10 rounded-xl p-5 hover:bg-white/[0.03] hover:border-purple-500/30 transition-all cursor-pointer overflow-hidden"
+                                    style={{ animationDelay: `${i * 50}ms` }}
+                                >
+                                    <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+
+                                    <div className="relative flex items-start justify-between gap-4">
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-center gap-3 mb-2">
+                                                <span className="font-mono text-xs font-medium text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded-full border border-purple-500/20">
+                                                    #{pr.number}
+                                                </span>
+                                                <h3 className="text-lg font-medium text-white truncate group-hover:text-purple-300 transition-colors">
+                                                    {pr.title}
+                                                </h3>
+                                            </div>
+
+                                            <div className="flex items-center gap-4 text-xs text-gray-500 font-medium">
+                                                <div className="flex items-center gap-1.5">
+                                                    <User className="w-3.5 h-3.5" />
+                                                    {pr.user}
+                                                </div>
+                                                <div className="flex items-center gap-1.5">
+                                                    <Calendar className="w-3.5 h-3.5" />
+                                                    {new Date(pr.updated_at).toLocaleDateString(undefined, {
+                                                        month: 'short',
+                                                        day: 'numeric',
+                                                        year: 'numeric'
+                                                    })}
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div className="flex items-center gap-1">
-                                            <Calendar className="w-3 h-3" />
-                                            {new Date(pr.updated_at).toLocaleDateString()}
+
+                                        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-white/5 text-gray-400 group-hover:bg-purple-500/20 group-hover:text-purple-300 transition-all">
+                                            <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
                                         </div>
                                     </div>
                                 </div>
-                                <ArrowRight className="w-5 h-5 text-gray-600 group-hover:text-blue-400 transform group-hover:translate-x-1 transition-all" />
-                            </div>
+                            ))}
                         </div>
-                    ))
-                )}
-            </main>
+                    )}
+                </main>
+            </div>
         </div>
     );
 }
