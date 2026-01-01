@@ -1,65 +1,88 @@
-import Image from "next/image";
+
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { ArrowRight, Github, Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export default function Home() {
+  const [url, setUrl] = useState("");
+  const [error, setError] = useState("");
+  const router = useRouter();
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+
+    if (!url.trim()) {
+      setError("Please key in a URL.");
+      return;
+    }
+
+    // Basic validation
+    const regex = /github\.com\/[\w.-]+\/[\w.-]+\/pull\/\d+/;
+    if (!regex.test(url)) {
+      setError("Please enter a valid GitHub PR URL (e.g., github.com/owner/repo/pull/123).");
+      return;
+    }
+
+    // Encode and push
+    const encoded = encodeURIComponent(url);
+    router.push(`/review?pr=${encoded}`);
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <main className="min-h-screen flex flex-col items-center justify-center bg-gray-950 text-white relative overflow-hidden">
+      {/* Background Gradients */}
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0">
+        <div className="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] bg-purple-600/20 blur-[120px] rounded-full mix-blend-screen animate-pulse" />
+        <div className="absolute top-[40%] -right-[10%] w-[50%] h-[60%] bg-blue-600/20 blur-[120px] rounded-full mix-blend-screen animate-pulse delay-700" />
+      </div>
+
+      <div className="z-10 w-full max-w-2xl px-6">
+        <div className="text-center mb-12 space-y-4">
+          <div className="inline-flex items-center justify-center p-3 bg-white/5 rounded-2xl mb-4 backdrop-blur-md border border-white/10 shadow-xl">
+            <Github className="w-10 h-10 text-white" />
+          </div>
+          <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-gray-200 to-gray-400">
+            PR Review Copilot
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="text-lg text-gray-400 max-w-lg mx-auto leading-relaxed">
+            AI-powered code reviews with risk analysis, test suggestions, and line-level citations.
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+
+        <form onSubmit={handleSubmit} className="relative group">
+          <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg blur opacity-25 group-hover:opacity-75 transition duration-1000 group-hover:duration-200" />
+          <div className="relative flex items-center bg-gray-900 rounded-lg border border-gray-800 p-2 shadow-2xl">
+            <input
+              type="text"
+              placeholder="https://github.com/owner/repo/pull/123"
+              className="flex-1 bg-transparent border-none text-white px-4 py-3 focus:outline-none placeholder-gray-600 font-mono text-sm"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+            <button
+              type="submit"
+              className="bg-white text-black px-6 py-3 rounded-md font-medium hover:bg-gray-200 transition-colors flex items-center gap-2"
+            >
+              Review PR
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
+        </form>
+
+        {error && (
+          <div className="mt-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-200 text-sm text-center backdrop-blur-sm">
+            {error}
+          </div>
+        )}
+      </div>
+
+      <footer className="absolute bottom-6 text-gray-600 text-sm">
+        Powered by OpenAI & GitHub API
+      </footer>
+    </main>
   );
 }
